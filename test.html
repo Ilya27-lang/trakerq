@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Персональный Трекер + Матрёшка</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=PT+Sans:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --white: #FFFFFF;
+      --cream: #F9F6F0;
+      --gzhel-blue: #0047AB;
+      --gzhel-light: #4A90D9;
+      --ruby-red: #E4151B;
+      --ruby-dark: #B81217;
+      --gold: #D4AF37;
+      --gold-light: #F4D03F;
+      --forest-green: #238823;
+      --night-blue: #0D3250;
+      --text-dark: #1a1d24;
+      --text-muted: #5a6270;
+      --border: #E0D5C7;
+      --level-0: var(--forest-green);
+      --level-1: var(--gold);
+      --level-2: var(--ruby-red);
+      --level-3: #8B0000;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(13, 50, 80, 0.08);
+      --shadow-hover: 0 8px 30px rgba(13, 50, 80, 0.12);
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'PT Sans', sans-serif;
+      background: linear-gradient(135deg, var(--cream) 0%, var(--white) 100%);
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+      padding-top: 100px;
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230047AB' fill-opacity='0.03'%3E%3Cpath d='M30 5c2 0 4 1.5 5 4 1-2.5 3-4 5-4s4 1.5 5 4c1-2.5 3-4 5-4v5c-2 0-4 1.5-5 4-1-2.5-3-4-5-4s-4 1.5-5 4c-1-2.5-3-4-5-4V5z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .container { max-width: 1400px; margin: 0 auto; }
+    
+    .main-header {
+      text-align: center;
+      margin-bottom: 32px;
+      position: relative;
+    }
+    
+    .main-header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--night-blue);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    
+    .main-header::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gzhel-blue), var(--ruby-red));
+      margin: 16px auto;
+      border-radius: 2px;
+    }
+    
+    .main-header p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    
+    .menu {
+      display: flex; 
+      gap: 12px; 
+      background: var(--white);
+      padding: 8px; 
+      border-radius: var(--radius); 
+      margin-bottom: 24px; 
+      border: 2px solid var(--border);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 60px; height: 60px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M0 60 L0 0 L60 0 Q30 30 0 60' fill='%230047AB' opacity='0.1'/%3E%3C/svg%3E");
+      opacity: 0.5;
+    }
+    
+    .menu-btn {
+      flex: 1; 
+      padding: 14px 20px; 
+      background: transparent; 
+      color: var(--text-muted);
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px; 
+      font-weight: 600; 
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .menu-btn:hover { 
+      background: rgba(0, 71, 171, 0.05); 
+      color: var(--gzhel-blue); 
+    }
+    
+    .menu-btn.active { 
+      background: linear-gradient(135deg, var(--gzhel-blue), var(--gzhel-light)); 
+      color: var(--white); 
+      box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3);
+    }
+    
+    .matryoshka-panel {
+      position: fixed; 
+      top: 0; left: 0; right: 0; 
+      background: var(--white);
+      border-bottom: 3px solid;
+      padding: 16px 24px; 
+      z-index: 100;
+      display: flex; 
+      align-items: center; 
+      gap: 16px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      animation: slideDown 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    @keyframes slideDown { 
+      from { transform: translateY(-100%); opacity: 0; } 
+      to { transform: translateY(0); opacity: 1; } 
+    }
+    
+    .matryoshka-emoji { 
+      font-size: 42px; 
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    
+    .matryoshka-content { flex: 1; }
+    
+    .matryoshka-title { 
+      font-family: 'Playfair Display', serif;
+      font-weight: 700; 
+      font-size: 16px; 
+      margin-bottom: 4px;
+      color: var(--night-blue);
+    }
+    
+    .matryoshka-text { 
+      font-size: 15px; 
+      color: var(--text-dark); 
+      line-height: 1.5;
+    }
+    
+    .matryoshka-close {
+      background: none; 
+      border: 2px solid var(--border); 
+      color: var(--text-muted); 
+      font-size: 22px; 
+      cursor: pointer;
+      padding: 6px 10px; 
+      border-radius: 50%; 
+      transition: all 0.3s;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .matryoshka-close:hover { 
+      background: var(--ruby-red); 
+      color: var(--white);
+      border-color: var(--ruby-red);
+      transform: rotate(90deg);
+    }
+    
+    .matryoshka-panel.level-0 { 
+      border-left: 6px solid var(--level-0);
+      background: linear-gradient(90deg, rgba(35, 136, 35, 0.05), var(--white));
+    }
+    .matryoshka-panel.level-1 { 
+      border-left: 6px solid var(--level-1);
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.08), var(--white));
+    }
+    .matryoshka-panel.level-2 { 
+      border-left: 6px solid var(--level-2);
+      background: linear-gradient(90deg, rgba(228, 21, 27, 0.08), var(--white));
+      animation: pulse 2s infinite, slideDown 0.5s ease;
+    }
+    .matryoshka-panel.level-3 { 
+      border-left: 6px solid var(--level-3);
+      background: linear-gradient(90deg, rgba(139, 0, 0, 0.1), var(--white));
+      animation: pulse 1s infinite, slideDown 0.5s ease;
+    }
+    
+    @keyframes pulse { 
+      0%, 100% { opacity: 1; box-shadow: 0 4px 20px rgba(0,0,0,0.1); } 
+      50% { opacity: 0.92; box-shadow: 0 6px 30px rgba(228, 21, 27, 0.2); } 
+    }
+    
+    .tab-content { 
+      display: none; 
+      animation: fadeIn 0.4s ease; 
+    }
+    .tab-content.active { display: block; }
+    
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: translateY(10px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    h2 { 
+      margin-bottom: 24px; 
+      font-family: 'Montserrat', sans-serif;
+      font-size: 24px; 
+      color: var(--night-blue);
+      font-weight: 700;
+      position: relative;
+      padding-bottom: 12px;
+    }
+    
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 60px; height: 3px;
+      background: linear-gradient(90deg, var(--gzhel-blue), var(--gold));
+      border-radius: 2px;
+    }
+    
+    .stats { 
+      display: flex; 
+      gap: 16px; 
+      margin-bottom: 28px; 
+      flex-wrap: wrap; 
+    }
+    
+    .stat-card {
+      flex: 1; 
+      min-width: 140px; 
+      background: linear-gradient(135deg, var(--cream), var(--white));
+      padding: 20px;
+      border-radius: var(--radius); 
+      border: 2px solid var(--border);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gzhel-blue), var(--gold));
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .stat-value { 
+      font-family: 'Montserrat', sans-serif;
+      font-size: 32px; 
+      font-weight: 700; 
+      margin-bottom: 6px;
+      color: var(--night-blue);
+    }
+    
+    .stat-label { 
+      color: var(--text-muted); 
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .input-group { 
+      display: flex; 
+      gap: 12px; 
+      margin-bottom: 28px; 
+    }
+    
+    input, select {
+      flex: 1; 
+      padding: 14px 18px; 
+      background: var(--white); 
+      border: 2px solid var(--border);
+      border-radius: 8px; 
+      color: var(--text-dark); 
+      font-family: 'PT Sans', sans-serif;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+    
+    input:focus, select:focus { 
+      outline: none; 
+      border-color: var(--gzhel-blue);
+      box-shadow: 0 0 0 4px rgba(0, 71, 171, 0.1);
+    }
+    
+    button.add {
+      padding: 14px 28px; 
+      background: linear-gradient(135deg, var(--gzhel-blue), var(--gzhel-light)); 
+      color: var(--white); 
+      border: none;
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600; 
+      font-size: 14px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 71, 171, 0.25);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    button.add:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 71, 171, 0.35);
+    }
+    
+    button.add:active { transform: translateY(0); }
+    
+    .list { list-style: none; }
+    
+    .item {
+      background: var(--white); 
+      border: 2px solid var(--border); 
+      padding: 18px;
+      margin-bottom: 12px; 
+      border-radius: var(--radius); 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+      transition: all 0.3s;
+      position: relative;
+    }
+    
+    .item::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 5px;
+      background: linear-gradient(180deg, var(--gzhel-blue), var(--gold));
+      border-radius: var(--radius) 0 0 var(--radius);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .item:hover {
+      border-color: var(--gzhel-blue);
+      box-shadow: var(--shadow);
+      transform: translateX(4px);
+    }
+    
+    .item:hover::before { opacity: 1; }
+    
+    .item-left { display: flex; align-items: center; gap: 16px; }
+    
+    .item-title { 
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--text-dark);
+    }
+    
+    .item-title.line-through {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    
+    .item-meta { 
+      color: var(--text-muted); 
+      font-size: 13px; 
+      margin-top: 4px;
+    }
+    
+    .actions { display: flex; gap: 10px; }
+    
+    .btn-icon {
+      width: 36px; height: 36px; 
+      border-radius: 8px; 
+      border: 2px solid var(--border); 
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; 
+      background: var(--white);
+      color: var(--text-muted); 
+      transition: all 0.3s;
+      font-size: 16px;
+    }
+    
+    .btn-icon:hover { 
+      background: var(--gzhel-blue); 
+      color: var(--white);
+      border-color: var(--gzhel-blue);
+      transform: scale(1.1);
+    }
+    
+    .btn-icon.danger:hover { 
+      background: var(--ruby-red); 
+      color: var(--white);
+      border-color: var(--ruby-red);
+    }
+    
+    .btn-icon.success {
+      background: var(--forest-green);
+      color: var(--white);
+      border-color: var(--forest-green);
+    }
+    
+    .btn-icon.success:hover {
+      background: #1a6b1a;
+    }
+    
+    .empty { 
+      text-align: center; 
+      color: var(--text-muted); 
+      padding: 48px 20px;
+      font-style: italic;
+      font-size: 15px;
+    }
+
+    /* === ВКЛАДКА НЕДЕЛЬНОГО РАСПИСАНИЯ === */
+    .schedule-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .schedule-header h2 {
+      margin-bottom: 0;
+      flex: 1;
+    }
+    
+    .schedule-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .schedule-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nav-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: var(--white);
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .nav-btn:hover {
+      background: var(--gzhel-blue);
+      color: var(--white);
+      border-color: var(--gzhel-blue);
+    }
+    
+    .week-label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--night-blue);
+      padding: 0 8px;
+      white-space: nowrap;
+    }
+    
+    .today-btn {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--night-blue);
+      border: none;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+    }
+    
+    .today-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    }
+    
+    .go-to-date-btn {
+      padding: 8px 12px;
+      background: var(--white);
+      color: var(--gzhel-blue);
+      border: 2px solid var(--gzhel-blue);
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .go-to-date-btn:hover {
+      background: var(--gzhel-blue);
+      color: var(--white);
+    }
+
+    .archive-btn-small {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, var(--night-blue), var(--gzhel-blue));
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+    }
+    
+    .archive-btn-small:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(13, 50, 80, 0.4);
+    }
+    
+    /* Статистика дня */
+    .day-stats-bar {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 16px 24px;
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    
+    .day-stats-bar .stat-mini {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stat-mini-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--night-blue);
+    }
+    
+    .stat-mini-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .day-stats-divider {
+      width: 2px;
+      height: 40px;
+      background: var(--border);
+      border-radius: 1px;
+    }
+    
+    .day-stats-bar .day-name-display {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    
+    .day-progress-bar {
+      flex: 1;
+      max-width: 200px;
+    }
+    
+    .day-progress-track {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .day-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--forest-green), #2ecc71);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    
+    .day-progress-text {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-top: 2px;
+    }
+    
+    /* Форма добавления */
+    .add-today-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 16px 20px;
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 2px dashed var(--border);
+    }
+    
+    .add-today-form input[type="text"] {
+      flex: 2;
+    }
+    
+    .add-today-form input[type="time"] {
+      flex: 1;
+      min-width: 110px;
+    }
+    
+    /* Таблица недели */
+    .week-table-container {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+    
+    .week-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+    
+    .week-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .week-table th {
+      padding: 14px 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      background: var(--cream);
+      border-bottom: 3px solid var(--border);
+    }
+    
+    .week-table th.today-col {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--night-blue);
+    }
+    
+    .week-table th .day-name-small {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .week-table th.today-col .day-name-small {
+      color: var(--night-blue);
+    }
+    
+    .week-table th .day-num {
+      font-size: 22px;
+      font-weight: 700;
+      display: block;
+      margin-top: 2px;
+    }
+    
+    .week-table td {
+      padding: 0;
+      vertical-align: top;
+      border-right: 1px solid var(--border);
+      min-width: 120px;
+      max-width: 180px;
+    }
+    
+    .week-table td:last-child {
+      border-right: none;
+    }
+    
+    .week-table td.today-col {
+      background: rgba(212, 175, 55, 0.06);
+      border-left: 3px solid var(--gold);
+      border-right: 3px solid var(--gold);
+    }
+    
+    .day-tasks-column {
+      padding: 10px;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .task-card {
+      padding: 10px 12px;
+      background: var(--cream);
+      border-radius: 6px;
+      border-left: 3px solid var(--gzhel-blue);
+      transition: all 0.2s;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    
+    .task-card.done {
+      opacity: 0.6;
+      border-left-color: var(--forest-green);
+      background: rgba(35, 136, 35, 0.08);
+    }
+    
+    .task-card.done .task-card-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    
+    .task-card-check {
+      width: 18px; height: 18px;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: var(--forest-green);
+      flex-shrink: 0;
+    }
+    
+    .task-card-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .task-card-text {
+      font-size: 13px;
+      color: var(--text-dark);
+      line-height: 1.4;
+      font-weight: 600;
+      word-break: break-word;
+    }
+    
+    .task-card-time {
+      font-size: 11px;
+      color: var(--gzhel-light);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    
+    .task-card-delete {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.2s;
+      line-height: 1;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .task-card:hover .task-card-delete {
+      opacity: 1;
+    }
+    
+    .task-card-delete:hover {
+      color: var(--ruby-red);
+      background: rgba(228, 21, 27, 0.1);
+    }
+    
+    .add-task-inline {
+      margin-top: auto;
+      padding: 8px;
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      text-align: center;
+      font-family: 'PT Sans', sans-serif;
+      font-weight: 600;
+    }
+    
+    .add-task-inline:hover {
+      background: rgba(0, 71, 171, 0.06);
+      border-color: var(--gzhel-blue);
+      color: var(--gzhel-blue);
+    }
+    
+    .day-empty-hint {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-style: italic;
+      padding: 20px 10px;
+    }
+
+    /* === МИНИ-МОДАЛЬНОЕ ОКНО ЗАДАЧИ === */
+    .mini-modal {
+      display: none;
+      position: fixed;
+      z-index: 1100;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(13, 50, 80, 0.6);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    .mini-modal.active { display: flex; }
+    
+    .mini-modal-content {
+      background: var(--white);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      border: 3px solid var(--gold);
+      animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    .mini-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 2px solid var(--border);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), var(--white));
+    }
+    
+    .mini-modal-header h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: var(--night-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .mini-modal-body {
+      padding: 20px;
+    }
+    
+    .mini-modal-field {
+      margin-bottom: 16px;
+    }
+    
+    .mini-modal-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    
+    .mini-modal-field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'PT Sans', sans-serif;
+      transition: all 0.3s;
+    }
+    
+    .mini-modal-field input:focus {
+      outline: none;
+      border-color: var(--gzhel-blue);
+      box-shadow: 0 0 0 4px rgba(0, 71, 171, 0.1);
+    }
+    
+    .time-row {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .time-row .mini-modal-field {
+      flex: 1;
+    }
+    
+    .mini-modal-footer {
+      padding: 16px 20px;
+      border-top: 2px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--cream);
+    }
+    
+    .mini-modal-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .mini-modal-btn.save {
+      background: linear-gradient(135deg, var(--gzhel-blue), var(--gzhel-light));
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3);
+    }
+    
+    .mini-modal-btn.save:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 71, 171, 0.4);
+    }
+    
+    .mini-modal-btn.cancel {
+      background: var(--white);
+      color: var(--text-muted);
+      border: 2px solid var(--border);
+    }
+    
+    .mini-modal-btn.cancel:hover {
+      background: var(--cream);
+      border-color: var(--ruby-red);
+      color: var(--ruby-red);
+    }
+
+    /* === МОДАЛЬНОЕ ОКНО АРХИВА === */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(13, 50, 80, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal-window {
+      background: var(--white);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 600px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      border: 3px solid var(--night-blue);
+      animation: slideUp 0.4s ease;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 2px solid var(--border);
+      background: linear-gradient(135deg, var(--cream), var(--white));
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    
+    .modal-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--night-blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .modal-close {
+      background: none;
+      border: 2px solid var(--border);
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    
+    .modal-close:hover {
+      background: var(--ruby-red);
+      color: var(--white);
+      border-color: var(--ruby-red);
+      transform: rotate(90deg);
+    }
+    
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 2px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: var(--cream);
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+    
+    .modal-btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .modal-btn.primary {
+      background: linear-gradient(135deg, var(--gzhel-blue), var(--gzhel-light));
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3);
+    }
+    
+    .modal-btn.secondary {
+      background: var(--white);
+      color: var(--text-dark);
+      border: 2px solid var(--border);
+    }
+    
+    .modal-btn.secondary:hover {
+      background: var(--cream);
+      border-color: var(--gzhel-blue);
+    }
+    
+    .archive-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    
+    .archive-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--cream);
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      transition: all 0.2s;
+    }
+    
+    .archive-item:hover {
+      border-color: var(--gzhel-blue);
+      box-shadow: var(--shadow);
+    }
+    
+    .archive-info { flex: 1; }
+    
+    .archive-period {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--night-blue);
+      margin-bottom: 4px;
+    }
+    
+    .archive-stats {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    .archive-progress-wrapper {
+      width: 100px;
+      flex-shrink: 0;
+    }
+    
+    .archive-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    
+    .archive-progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    
+    .archive-progress-fill.high {
+      background: linear-gradient(90deg, var(--forest-green), #2ecc71);
+    }
+    
+    .archive-progress-fill.medium {
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    }
+    
+    .archive-progress-fill.low {
+      background: linear-gradient(90deg, var(--ruby-red), var(--ruby-dark));
+    }
+    
+    .archive-percent {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    
+    .archive-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      body { padding-top: 110px; }
+      .main-header h1 { font-size: 24px; }
+      .menu { flex-direction: column; }
+      .input-group { flex-direction: column; }
+      .tab-content { padding: 0; }
+      .stats { flex-direction: column; }
+      .stat-card { min-width: 100%; }
+      
+      .add-today-form {
+        flex-direction: column;
+      }
+      
+      .day-stats-bar {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      
+      .day-stats-divider { display: none; }
+      
+      .day-progress-bar {
+        max-width: 100%;
+        width: 100%;
+        order: 10;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ПАНЕЛЬ МАТРЁШКИ -->
+  <div id="matryoshka-panel" class="matryoshka-panel level-0">
+    <div class="matryoshka-emoji" id="m-emoji">🪆</div>
+    <div class="matryoshka-content">
+      <div class="matryoshka-title" id="m-title">Настроение: Спокойное</div>
+      <div class="matryoshka-text" id="m-text">Загружаю характер...</div>
+    </div>
+    <button class="matryoshka-close" onclick="hideMatryoshka()">✕</button>
+  </div>
+
+  <div class="container">
+    <header class="main-header">
+      <h1>Персональный Трекер</h1>
+      <p>Система самоорганизации с русским характером</p>
+    </header>
+    
+    <nav class="menu">
+      <button class="menu-btn active" data-tab="habits">🔹 Трекер привычек</button>
+      <button class="menu-btn" data-tab="schedule">📅 Расписание</button>
+      <button class="menu-btn" data-tab="budget">💰 Бюджет</button>
+    </nav>
+
+    <main>
+      <!-- ХАБИТЫ -->
+      <section id="habits" class="tab-content active">
+        <h2>Трекер привычек</h2>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-value" id="h-total">0</div><div class="stat-label">Всего</div></div>
+          <div class="stat-card"><div class="stat-value" id="h-done">0</div><div class="stat-label">Выполнено сегодня</div></div>
+          <div class="stat-card"><div class="stat-value" id="h-streak">0</div><div class="stat-label">Серия (дней)</div></div>
+        </div>
+        <div class="input-group">
+          <input type="text" id="h-input" placeholder="Новая привычка (напр. Медитация 10 мин)">
+          <button class="add" onclick="addHabit()">Добавить</button>
+        </div>
+        <ul class="list" id="h-list"></ul>
+        <div class="empty" id="h-empty" style="display:none;">Нет привычек. Добавьте первую! ✨</div>
+      </section>
+
+      <!-- РАСПИСАНИЕ — полное окно недели -->
+      <section id="schedule" class="tab-content">
+        <!-- Навигация по неделям -->
+        <div class="schedule-header">
+          <h2>Недельное расписание</h2>
+          <div class="schedule-actions">
+            <div class="schedule-nav">
+              <button class="nav-btn" onclick="changeWeek(-1)">◀</button>
+              <span class="week-label" id="week-label">Эта неделя</span>
+              <button class="nav-btn" onclick="changeWeek(1)">▶</button>
+            </div>
+            <button class="today-btn" onclick="goToToday()">Сегодня</button>
+            <button class="go-to-date-btn" onclick="openGoToDateModal()">📅 К дате</button>
+            <button class="archive-btn-small" onclick="openArchiveModal()">🗄️ Архив</button>
+          </div>
+        </div>
+        
+        <!-- Статистика текущего дня -->
+        <div class="day-stats-bar">
+          <div class="day-name-display" id="current-day-name">Понедельник</div>
+          <div class="day-stats-divider"></div>
+          <div class="stat-mini">
+            <div class="stat-mini-value" id="day-total">0</div>
+            <div class="stat-mini-label">Задач</div>
+          </div>
+          <div class="day-stats-divider"></div>
+          <div class="stat-mini">
+            <div class="stat-mini-value" id="day-done" style="color:var(--forest-green)">0</div>
+            <div class="stat-mini-label">Выполнено</div>
+          </div>
+          <div class="day-progress-bar">
+            <div class="day-progress-track">
+              <div class="day-progress-fill" id="day-progress-fill" style="width:0%"></div>
+            </div>
+            <div class="day-progress-text" id="day-progress-text">0%</div>
+          </div>
+        </div>
+        
+        <!-- Форма добавления в текущий день -->
+        <div class="add-today-form">
+          <input type="text" id="today-task-input" placeholder="Название задачи..." onkeypress="if(event.key==='Enter')addTaskToday()">
+          <input type="time" id="today-task-start">
+          <input type="time" id="today-task-end">
+          <button class="add" onclick="addTaskToday()" style="padding:14px 24px;">Добавить</button>
+        </div>
+        
+        <!-- Таблица недели -->
+        <div class="week-table-container">
+          <table class="week-table">
+            <thead>
+              <tr id="week-table-head"></tr>
+            </thead>
+            <tbody>
+              <tr id="week-table-body"></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- БЮДЖЕТ -->
+      <section id="budget" class="tab-content">
+        <h2>Бюджет</h2>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-value" id="b-balance" style="color:var(--forest-green)">0 ₽</div><div class="stat-label">Баланс</div></div>
+          <div class="stat-card"><div class="stat-value" id="b-income" style="color:var(--forest-green)">0 ₽</div><div class="stat-label">Доходы</div></div>
+          <div class="stat-card"><div class="stat-value" id="b-expense" style="color:var(--ruby-red)">0 ₽</div><div class="stat-label">Расходы</div></div>
+        </div>
+        <div class="input-group">
+          <select id="b-type">
+            <option value="income">➕ Доход</option>
+            <option value="expense">➖ Расход</option>
+          </select>
+          <input type="number" id="b-amount" placeholder="Сумма" min="0" step="0.01">
+          <input type="text" id="b-desc" placeholder="Описание (напр. Зарплата, Продукты)">
+          <button class="add" onclick="addTransaction()">Добавить</button>
+        </div>
+        <ul class="list" id="b-list"></ul>
+        <div class="empty" id="b-empty" style="display:none;">Транзакций пока нет 💸</div>
+      </section>
+    </main>
+  </div>
+
+  <!-- МИНИ-МОДАЛЬНОЕ ОКНО НАСТРОЙКИ ЗАДАЧИ -->
+  <div id="mini-modal" class="mini-modal">
+    <div class="mini-modal-content">
+      <div class="mini-modal-header">
+        <h4>✏️ Настройка задачи</h4>
+        <button class="modal-close" onclick="closeMiniModal()" style="width:32px;height:32px;font-size:18px;">✕</button>
+      </div>
+      <div class="mini-modal-body">
+        <div class="mini-modal-field">
+          <label>Название задачи</label>
+          <input type="text" id="mini-task-name" placeholder="Напр. Встреча с клиентом" maxlength="100">
+        </div>
+        <div class="time-row">
+          <div class="mini-modal-field">
+            <label>Время начала</label>
+            <input type="time" id="mini-task-start">
+          </div>
+          <div class="mini-modal-field">
+            <label>Время окончания</label>
+            <input type="time" id="mini-task-end">
+          </div>
+        </div>
+      </div>
+      <div class="mini-modal-footer">
+        <button class="mini-modal-btn cancel" onclick="closeMiniModal()">Отмена</button>
+        <button class="mini-modal-btn save" onclick="confirmAddTask()">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО "К ДАТЕ" -->
+  <div id="go-to-date-modal" class="mini-modal">
+    <div class="mini-modal-content" style="max-width:320px; border-color:var(--gzhel-blue);">
+      <div class="mini-modal-header">
+        <h4> Перейти к дате</h4>
+        <button class="modal-close" onclick="closeGoToDateModal()" style="width:32px;height:32px;font-size:18px;"></button>
+      </div>
+      <div class="mini-modal-body" style="padding:20px;">
+        <div class="mini-modal-field">
+          <label>Выберите дату</label>
+          <input type="date" id="date-picker-input" style="font-size:16px; padding:10px;">
+        </div>
+      </div>
+      <div class="mini-modal-footer">
+        <button class="mini-modal-btn cancel" onclick="closeGoToDateModal()">Отмена</button>
+        <button class="mini-modal-btn save" onclick="confirmGoToDate()">Перейти</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО АРХИВА -->
+  <div id="archive-modal" class="modal-overlay">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>🗄️ Архив недель</h3>
+        <button class="modal-close" onclick="closeArchiveModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="archive-list-container"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" onclick="closeArchiveModal()">Закрыть</button>
+        <button class="modal-btn primary" onclick="clearArchive()">🗑️ Очистить</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === УТИЛИТЫ ===
+    const $ = id => document.getElementById(id);
+    
+    // ИСПРАВЛЕНИЕ: Используем локальное время везде, чтобы избежать сдвига дат
+    const today = () => {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    const save = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+    const load = (key) => JSON.parse(localStorage.getItem(key) || '[]');
+
+    // === МЕНЮ ===
+    document.querySelectorAll('.menu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        $(btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'schedule') renderWeekSchedule();
+      });
+    });
+
+    // === СИСТЕМА МАТРЁШКИ ===
+    const MATRYOSHKA_KEY = 'matryoshka_state';
+    const M_PHRASES = {
+      0: {
+        title: "Настроение: Суровая, но справедливая",
+        success: ["Красавчик! Так держать!", "Молодец, но не расслабляйся.", "Дисциплина — дело тонкое."],
+        daily: "День начинается. Матрёшка следит."
+      },
+      1: {
+        title: "Настроение: Хмурится",
+        warning: ["Тянешь резину?", "Дело не ждёт.", "Задача висит."],
+        daily: "Вижу недочёты."
+      },
+      2: {
+        title: "Настроение: Злится",
+        threat: ["Отговорки не слушу!", "Задача не сделана!", "Хватит лениться!"],
+        daily: "Просрочки копятся."
+      },
+      3: {
+        title: "Настроение: В БЕШЕНСТВЕ",
+        harsh: ["Будешь отлынивать!", "Делай или уходи!", "Терпение лопнуло!"],
+        daily: "Всё, терпение лопнуло."
+      }
+    };
+
+    let mState = JSON.parse(localStorage.getItem(MATRYOSHKA_KEY) || '{"failStreak":0,"lastDate":""}');
+
+    function getMatryoshkaLevel(completionRate, totalTasks) {
+      if (totalTasks === 0) return 0;
+      if (completionRate >= 0.8 && mState.failStreak === 0) return 0;
+      if (completionRate >= 0.5 || mState.failStreak === 1) return 1;
+      if (completionRate >= 0.2 || mState.failStreak <= 2) return 2;
+      return 3;
+    }
+
+    function updateMatryoshkaState() {
+      const todayStr = today();
+      if (mState.lastDate !== todayStr) {
+        mState.lastDate = todayStr;
+        save(MATRYOSHKA_KEY, mState);
+      }
+    }
+
+    function triggerMatryoshka(type) {
+      const tasks = [...habits, ...weekSchedule.filter(s => s.date === today())];
+      const completed = habits.filter(h => h.dates.includes(today())).length + weekSchedule.filter(s => s.date === today() && s.done).length;
+      const total = tasks.length;
+      const rate = total > 0 ? completed / total : 1;
+      
+      updateMatryoshkaState();
+
+      if (rate < 0.5) {
+        mState.failStreak++;
+        save(MATRYOSHKA_KEY, mState);
+      } else {
+        mState.failStreak = 0;
+        save(MATRYOSHKA_KEY, mState);
+      }
+
+      const level = getMatryoshkaLevel(rate, total);
+      let msg, title;
+
+      if (type === 'success' && level <= 1) {
+        msg = M_PHRASES[level].success[Math.floor(Math.random() * M_PHRASES[level].success.length)];
+        title = M_PHRASES[level].title;
+      } else if (type === 'fail' || type === 'init') {
+        const category = level === 1 ? 'warning' : level === 2 ? 'threat' : 'harsh';
+        msg = type === 'init' ? M_PHRASES[level].daily : M_PHRASES[level][category][Math.floor(Math.random() * M_PHRASES[level][category].length)];
+        title = M_PHRASES[level].title;
+      }
+
+      showMatryoshkaUI(title, msg, level);
+    }
+
+    function showMatryoshkaUI(title, text, level) {
+      const panel = $('matryoshka-panel');
+      panel.className = `matryoshka-panel level-${level}`;
+      $('m-title').textContent = title;
+      $('m-text').textContent = text;
+      panel.style.display = 'flex';
+      panel.style.animation = 'slideDown 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+    }
+
+    function hideMatryoshka() {
+      $('matryoshka-panel').style.display = 'none';
+    }
+
+    // === ТРЕКЕР ПРИВЫЧЕК ===
+    let habits = load('habits');
+    const renderHabits = () => {
+      const list = $('h-list'); list.innerHTML = '';
+      const todayStr = today();
+      let doneToday = 0; let maxStreak = 0;
+      habits.forEach((h, i) => {
+        const isDone = h.dates.includes(todayStr);
+        if (isDone) doneToday++;
+        let streak = 0, d = new Date();
+        while (h.dates.includes(d.toISOString().split('T')[0])) { streak++; d.setDate(d.getDate() - 1); }
+        maxStreak = Math.max(maxStreak, streak);
+        const li = document.createElement('li'); li.className = 'item';
+        li.innerHTML = `
+          <div class="item-left">
+            <button class="btn-icon ${isDone ? 'success' : ''}" onclick="toggleHabit(${i})">${isDone ? '✓' : '○'}</button>
+            <div>
+              <div class="item-title ${isDone ? 'line-through' : ''}" style="opacity:${isDone?0.7:1}">${h.name}</div>
+              <div class="item-meta">Серия: ${streak} дн. | Всего: ${h.dates.length}</div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn-icon danger" onclick="deleteHabit(${i})">🗑</button></div>
+        `; list.appendChild(li);
+      });
+      $('h-total').textContent = habits.length;
+      $('h-done').textContent = doneToday;
+      $('h-streak').textContent = maxStreak;
+      $('h-empty').style.display = habits.length ? 'none' : 'block';
+      triggerMatryoshka('render');
+    };
+    const addHabit = () => { const val = $('h-input').value.trim(); if (!val) return; habits.push({ name: val, dates: [] }); save('habits', habits); $('h-input').value = ''; renderHabits(); };
+    const toggleHabit = (idx) => { const d = today(); const dates = habits[idx].dates; dates.includes(d) ? dates.splice(dates.indexOf(d), 1) : dates.push(d); save('habits', habits); renderHabits(); triggerMatryoshka('success'); };
+    const deleteHabit = (idx) => { habits.splice(idx, 1); save('habits', habits); renderHabits(); };
+
+    // === БЮДЖЕТ ===
+    let transactions = load('transactions');
+    const renderBudget = () => {
+      const list = $('b-list'); list.innerHTML = '';
+      const sorted = [...transactions].sort((a,b) => b.id - a.id);
+      let income = 0, expense = 0;
+      sorted.forEach(t => {
+        if (t.type === 'income') income += t.amount; else expense += t.amount;
+        const li = document.createElement('li'); li.className = 'item';
+        li.style.borderLeft = `4px solid ${t.type === 'income' ? 'var(--forest-green)' : 'var(--ruby-red)'}`;
+        li.innerHTML = `
+          <div class="item-left"><div><div class="item-title">${t.desc || (t.type === 'income' ? 'Доход' : 'Расход')}</div><div class="item-meta">${new Date(t.date).toLocaleDateString('ru-RU')} • ${t.type === 'income' ? '➕' : '➖'}</div></div></div>
+          <div class="item-title" style="color:${t.type === 'income' ? 'var(--forest-green)' : 'var(--ruby-red)'}">${t.type === 'income' ? '+' : '-'}${t.amount.toLocaleString('ru-RU')} ₽</div>
+          <button class="btn-icon danger" style="margin-left:10px" onclick="deleteTransaction(${t.id})"></button>
+        `; list.appendChild(li);
+      });
+      const balance = income - expense;
+      $('b-balance').textContent = balance.toLocaleString('ru-RU') + ' ₽';
+      $('b-income').textContent = income.toLocaleString('ru-RU') + ' ₽';
+      $('b-expense').textContent = expense.toLocaleString('ru-RU') + ' ₽';
+      $('b-empty').style.display = transactions.length ? 'none' : 'block';
+    };
+    const addTransaction = () => { const type = $('b-type').value; const amount = parseFloat($('b-amount').value); const desc = $('b-desc').value.trim(); if (!amount || amount <= 0) return; transactions.push({ id: Date.now(), date: new Date().toISOString(), type, amount, desc }); save('transactions', transactions); $('b-amount').value = ''; $('b-desc').value = ''; renderBudget(); };
+    const deleteTransaction = (id) => { transactions = transactions.filter(t => t.id !== id); save('transactions', transactions); renderBudget(); };
+
+    // === НЕДЕЛЬНОЕ РАСПИСАНИЕ ===
+    let weekSchedule = load('weekSchedule');
+    let weekArchive = load('weekArchive');
+    const DAYS_RU = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    const DAYS_FULL_RU = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+    const MONTHS_RU = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    
+    let currentWeekOffset = 0;
+    let currentAddDate = null;
+    
+    // ИСПРАВЛЕНИЕ: Работа с локальным временем
+    function getWeekDates(offset = 0) {
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 - Вс, 1 - Пн
+      // Смещение до понедельника
+      const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+      const monday = new Date(now);
+      monday.setDate(diff + (offset * 7));
+      
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        dates.push({
+          dateObj: d,
+          dateStr: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,
+          day: d.getDate(),
+          month: d.getMonth()
+        });
+      }
+      return dates;
+    }
+    
+    function isWeekFinished(weekDates) {
+      const sundayStr = weekDates[6].dateStr;
+      const todayStr = today();
+      return todayStr > sundayStr;
+    }
+    
+    function archiveWeek(weekDates) {
+      const weekKey = `week-${weekDates[0].dateStr}-to-${weekDates[6].dateStr}`;
+      if (weekArchive.some(w => w.weekKey === weekKey)) return;
+      
+      const tasks = weekSchedule.filter(t => weekDates.some(d => d.dateStr === t.date));
+      if (tasks.length === 0) return;
+      
+      const totalTasks = tasks.length;
+      const completedTasks = tasks.filter(t => t.done).length;
+      const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      
+      weekArchive.unshift({
+        weekKey: weekKey,
+        startDate: weekDates[0].dateStr,
+        endDate: weekDates[6].dateStr,
+        tasks: tasks,
+        totalTasks: totalTasks,
+        completedTasks: completedTasks,
+        progress: progress
+      });
+      
+      save('weekArchive', weekArchive);
+      weekSchedule = weekSchedule.filter(t => !weekDates.some(d => d.dateStr === t.date));
+      save('weekSchedule', weekSchedule);
+    }
+    
+    function autoArchivePastWeeks() {
+      let offset = -1;
+      while (offset >= -52) {
+        const weekDates = getWeekDates(offset);
+        if (isWeekFinished(weekDates)) {
+          archiveWeek(weekDates);
+        } else {
+          break;
+        }
+        offset--;
+      }
+    }
+    
+    function renderWeekSchedule() {
+      autoArchivePastWeeks();
+      
+      const weekDates = getWeekDates(currentWeekOffset);
+      const todayStr = today();
+      const todayIdx = weekDates.findIndex(d => d.dateStr === todayStr);
+      
+      // Обновляем лейбл недели с годом
+      const start = weekDates[0].dateObj;
+      const end = weekDates[6].dateObj;
+      const label = currentWeekOffset === 0 
+        ? `Эта неделя (${start.getDate()} ${MONTHS_RU[start.getMonth()]} — ${end.getDate()} ${MONTHS_RU[end.getMonth()]} ${end.getFullYear()})` 
+        : `${start.getDate()} ${MONTHS_RU[start.getMonth()]} — ${end.getDate()} ${MONTHS_RU[end.getMonth()]} ${end.getFullYear()}`;
+      $('week-label').textContent = label;
+      
+      // Статистика текущего дня
+      if (todayIdx >= 0) {
+        const todayTasks = weekSchedule.filter(t => t.date === todayStr);
+        const todayDone = todayTasks.filter(t => t.done).length;
+        const todayTotal = todayTasks.length;
+        const progress = todayTotal > 0 ? Math.round((todayDone / todayTotal) * 100) : 0;
+        
+        // Определяем день недели для todayStr
+        const now = new Date();
+        const dayIdx = now.getDay() === 0 ? 6 : now.getDay() - 1;
+        $('current-day-name').textContent = DAYS_FULL_RU[dayIdx];
+        $('day-total').textContent = todayTotal;
+        $('day-done').textContent = todayDone;
+        $('day-progress-fill').style.width = progress + '%';
+        $('day-progress-text').textContent = progress + '%';
+        
+        const fill = $('day-progress-fill');
+        fill.className = 'day-progress-fill';
+        if (progress >= 70) fill.style.background = 'linear-gradient(90deg, var(--forest-green), #2ecc71)';
+        else if (progress >= 40) fill.style.background = 'linear-gradient(90deg, var(--gold), var(--gold-light))';
+        else fill.style.background = 'linear-gradient(90deg, var(--ruby-red), var(--ruby-dark))';
+      } else {
+        $('current-day-name').textContent = '—';
+        $('day-total').textContent = '0';
+        $('day-done').textContent = '0';
+        $('day-progress-fill').style.width = '0%';
+        $('day-progress-text').textContent = '—';
+      }
+      
+      // Таблица
+      const headRow = $('week-table-head');
+      const bodyRow = $('week-table-body');
+      headRow.innerHTML = '';
+      bodyRow.innerHTML = '';
+      
+      weekDates.forEach((dateInfo, idx) => {
+        const dayName = DAYS_RU[idx];
+        const isToday = dateInfo.dateStr === todayStr;
+        
+        const th = document.createElement('th');
+        th.className = isToday ? 'today-col' : '';
+        th.innerHTML = `
+          <span class="day-name-small">${dayName}</span>
+          <span class="day-num">${dateInfo.day}</span>
+        `;
+        headRow.appendChild(th);
+        
+        const td = document.createElement('td');
+        td.className = isToday ? 'today-col' : '';
+        
+        const col = document.createElement('div');
+        col.className = 'day-tasks-column';
+        
+        const tasks = weekSchedule.filter(t => t.date === dateInfo.dateStr);
+        
+        if (tasks.length === 0) {
+          col.innerHTML = `<div class="day-empty-hint">Нет задач</div>`;
+        } else {
+          tasks.forEach(task => {
+            let timeDisplay = '';
+            if (task.timeStart) {
+              timeDisplay = task.timeEnd ? `${task.timeStart} — ${task.timeEnd}` : `⏰ ${task.timeStart}`;
+            }
+            
+            const card = document.createElement('div');
+            card.className = `task-card ${task.done ? 'done' : ''}`;
+            card.innerHTML = `
+              <input type="checkbox" class="task-card-check" ${task.done ? 'checked' : ''} onchange="toggleWeekTask('${task.id}')">
+              <div class="task-card-content">
+                <div class="task-card-text">${escapeHtml(task.text)}</div>
+                ${timeDisplay ? `<div class="task-card-time">${timeDisplay}</div>` : ''}
+              </div>
+              <button class="task-card-delete" onclick="deleteWeekTask('${task.id}')">✕</button>
+            `;
+            col.appendChild(card);
+          });
+        }
+        
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-task-inline';
+        addBtn.textContent = `+ Задача в ${dayName}`;
+        addBtn.onclick = () => openMiniModal(idx, dateInfo.dateStr);
+        col.appendChild(addBtn);
+        
+        td.appendChild(col);
+        bodyRow.appendChild(td);
+      });
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function changeWeek(direction) {
+      currentWeekOffset += direction;
+      renderWeekSchedule();
+    }
+    
+    function goToToday() {
+      currentWeekOffset = 0;
+      renderWeekSchedule();
+    }
+    
+    function addTaskToday() {
+      const text = $('today-task-input').value.trim();
+      if (!text) {
+        $('today-task-input').style.borderColor = 'var(--ruby-red)';
+        $('today-task-input').focus();
+        setTimeout(() => $('today-task-input').style.borderColor = '', 2000);
+        return;
+      }
+      
+      const weekDates = getWeekDates(currentWeekOffset);
+      const todayStr = today();
+      const todayIdx = weekDates.findIndex(d => d.dateStr === todayStr);
+      
+      const targetDate = todayIdx >= 0 ? todayStr : weekDates[6].dateStr;
+      
+      weekSchedule.push({
+        id: Date.now().toString(),
+        date: targetDate,
+        text: text,
+        done: false,
+        timeStart: $('today-task-start').value || '',
+        timeEnd: $('today-task-end').value || ''
+      });
+      
+      save('weekSchedule', weekSchedule);
+      $('today-task-input').value = '';
+      $('today-task-start').value = '';
+      $('today-task-end').value = '';
+      renderWeekSchedule();
+      triggerMatryoshka('success');
+    }
+    
+    // === МИНИ-МОДАЛЬНОЕ ОКНО ===
+    function openMiniModal(dayIdx, date) {
+      currentAddDate = date;
+      $('mini-task-name').value = '';
+      $('mini-task-start').value = '';
+      $('mini-task-end').value = '';
+      $('mini-modal').classList.add('active');
+      setTimeout(() => $('mini-task-name').focus(), 100);
+    }
+    
+    function closeMiniModal() {
+      $('mini-modal').classList.remove('active');
+      currentAddDate = null;
+    }
+    
+    function confirmAddTask() {
+      const text = $('mini-task-name').value.trim();
+      if (!text) {
+        $('mini-task-name').style.borderColor = 'var(--ruby-red)';
+        $('mini-task-name').focus();
+        setTimeout(() => $('mini-task-name').style.borderColor = '', 2000);
+        return;
+      }
+      
+      weekSchedule.push({
+        id: Date.now().toString(),
+        date: currentAddDate,
+        text: text,
+        done: false,
+        timeStart: $('mini-task-start').value || '',
+        timeEnd: $('mini-task-end').value || ''
+      });
+      
+      save('weekSchedule', weekSchedule);
+      closeMiniModal();
+      renderWeekSchedule();
+      triggerMatryoshka('success');
+    }
+    
+    function toggleWeekTask(id) {
+      const task = weekSchedule.find(t => t.id === id);
+      if (task) {
+        task.done = !task.done;
+        save('weekSchedule', weekSchedule);
+        renderWeekSchedule();
+        triggerMatryoshka('success');
+      }
+    }
+    
+    function deleteWeekTask(id) {
+      weekSchedule = weekSchedule.filter(t => t.id !== id);
+      save('weekSchedule', weekSchedule);
+      renderWeekSchedule();
+    }
+    
+    $('mini-modal').addEventListener('click', (e) => {
+      if (e.target === $('mini-modal')) closeMiniModal();
+    });
+    
+    $('mini-task-name').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') confirmAddTask();
+    });
+
+    // === БЫСТРЫЙ ПЕРЕХОД К ДАТЕ ===
+    function openGoToDateModal() {
+      $('date-picker-input').value = today();
+      $('go-to-date-modal').classList.add('active');
+    }
+    
+    function closeGoToDateModal() {
+      $('go-to-date-modal').classList.remove('active');
+    }
+    
+    function confirmGoToDate() {
+      const selectedVal = $('date-picker-input').value;
+      if (!selectedVal) return;
+      
+      const selectedDate = new Date(selectedVal);
+      const todayDate = new Date(today());
+      
+      // Сбрасываем время для корректного сравнения
+      selectedDate.setHours(0,0,0,0);
+      todayDate.setHours(0,0,0,0);
+      
+      // Разница в днях
+      const diffTime = selectedDate - todayDate;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      // Вычисляем смещение в неделях
+      // Если разница 0, то offset 0. Если разница 7, то offset 1.
+      // Но нам нужно смещение понедельника.
+      // Просто делим дни на 7 и округляем.
+      currentWeekOffset = Math.round(diffDays / 7);
+      
+      closeGoToDateModal();
+      renderWeekSchedule();
+    }
+    
+    $('go-to-date-modal').addEventListener('click', (e) => {
+      if (e.target === $('go-to-date-modal')) closeGoToDateModal();
+    });
+
+    // === АРХИВ НЕДЕЛЬ ===
+    function openArchiveModal() {
+      autoArchivePastWeeks();
+      
+      const container = $('archive-list-container');
+      container.innerHTML = '';
+      
+      if (weekArchive.length === 0) {
+        container.innerHTML = '<div class="archive-empty">Архив пуст. Прошедшие недели появятся здесь автоматически. 🗓️</div>';
+      } else {
+        const listEl = document.createElement('div');
+        listEl.className = 'archive-list';
+        
+        weekArchive.forEach(week => {
+          const start = new Date(week.startDate);
+          const end = new Date(week.endDate);
+          const periodStr = `${start.getDate()} ${MONTHS_RU[start.getMonth()]} — ${end.getDate()} ${MONTHS_RU[end.getMonth()]} ${end.getFullYear()}`;
+          
+          const progressClass = week.progress >= 70 ? 'high' : week.progress >= 40 ? 'medium' : 'low';
+          
+          const item = document.createElement('div');
+          item.className = 'archive-item';
+          item.innerHTML = `
+            <div class="archive-info">
+              <div class="archive-period">${periodStr}</div>
+              <div class="archive-stats">${week.completedTasks} из ${week.totalTasks} задач выполнено</div>
+            </div>
+            <div class="archive-progress-wrapper">
+              <div class="archive-progress-bar">
+                <div class="archive-progress-fill ${progressClass}" style="width: ${week.progress}%"></div>
+              </div>
+              <div class="archive-percent">${week.progress}%</div>
+            </div>
+          `;
+          listEl.appendChild(item);
+        });
+        
+        container.appendChild(listEl);
+      }
+      
+      $('archive-modal').classList.add('active');
+    }
+    
+    function closeArchiveModal() {
+      $('archive-modal').classList.remove('active');
+    }
+    
+    function clearArchive() {
+      if (weekArchive.length === 0) return;
+      if (confirm('Удалить все записи из архива? Это нельзя отменить.')) {
+        weekArchive = [];
+        save('weekArchive', weekArchive);
+        openArchiveModal();
+      }
+    }
+    
+    $('archive-modal').addEventListener('click', (e) => {
+      if (e.target === $('archive-modal')) closeArchiveModal();
+    });
+
+    // === ИНИЦИАЛИЗАЦИЯ ===
+    renderHabits(); 
+    renderWeekSchedule(); 
+    renderBudget();
+    triggerMatryoshka('init');
+  </script>
+</body>
+</html>
